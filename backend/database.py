@@ -28,9 +28,23 @@ def initialise_database():
             title TEXT NOT NULL,
             url TEXT NOT NULL,
             platform TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'pending',
+            status TEXT NOT NULL DEFAULT 'Pending',
+            processing_message TEXT DEFAULT 'Waiting to be processed',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
+    """)
+
+    columns = connection.execute(
+        "PRAGMA table_info(projects)"
+    ).fetchall()
+
+    column_names = [column["name"] for column in columns]
+
+    if "processing_message" not in column_names:
+        connection.execute("""
+        ALTER TABLE projects
+        ADD COLUMN processing_message TEXT
+        DEFAULT 'Waiting to be processed'
     """)
 
     connection.commit()
@@ -58,8 +72,8 @@ def get_projects():
 
     rows = connection.execute(
         """
-        SELECT id, title, url, platform, status, created_at
-        FROM projects
+        SELECT id, title, url, platform, status, processing_message, created_at
+        FROM projects   
         ORDER BY created_at DESC, id DESC
         """
     ).fetchall()
@@ -68,6 +82,23 @@ def get_projects():
     connection.close()
 
     return projects
+
+def get_project(project_id):
+    connection = get_connection()
+
+    row = connection.execute(
+        """
+        SELECT id, title, url, platform, status, processing_message, created_at
+        FROM projects
+        WHERE id = ?
+        """,
+        (project_id,),
+    ).fetchone()
+
+    project = dict(row) if row else None
+    connection.close()
+
+    return project
 
 def delete_project(project_id):
     connection = get_connection()

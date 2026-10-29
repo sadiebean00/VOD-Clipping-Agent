@@ -10,6 +10,7 @@ from backend.database import (
     initialise_database,
     create_project,
     get_projects,
+    get_project,
     delete_project,
 )
 
@@ -52,6 +53,18 @@ def health_check():
 @app.get("/api/projects")
 def list_projects():
     return get_projects()
+
+@app.get("/api/projects/{project_id}")
+def project_details(project_id: int):
+    project = get_project(project_id)
+
+    if not project:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found.",
+        )
+
+    return project
 
 @app.delete("/api/projects/{project_id}")
 def remove_project(project_id: int):
