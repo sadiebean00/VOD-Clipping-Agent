@@ -218,3 +218,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Python virtual environments
+.venv/
+venv/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Local settings and secrets
+.env
+.env.*
+
+# Downloaded AI models
+models/
+
+# Video files and exports
+*.mp4
+*.mkv
+*.mov
+*.webm
+
+# Local application data
+data/
