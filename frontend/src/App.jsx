@@ -1,5 +1,7 @@
 
-import { useState, useEffect, cache } from 'react'
+import { useState, useEffect } from 'react'
+import NewProjectPage from './pages/NewProjectPage'
+import DashboardPage from './pages/DashboardPage'
 import './App.css'
 
 // Main navigation items for the dashboard.
@@ -10,93 +12,6 @@ const navigationItems = [
   { name: 'Clips', icon: '▷' },
   { name: 'Settings', icon: '⚙' },
 ]
-
-function NewProjectPage() {
-  const [videoURL, setVideoURL] = useState('')
-  const [projectTitle, setProjectTitle] = useState('')
-  const [status, setStatus] = useState('')
-  async function handleLoadVOD() {
-    if (projectTitle.trim() === '') {
-      setStatus('Please enter a project name.')
-      return
-    }
-    
-    if (videoURL.trim() === '') {
-      setStatus('Please enter a video link first.')
-      return
-    }
-
-    let url
-
-    try {
-      url = new URL(videoURL.trim())
-    } catch {
-      setStatus('That link does not look like a valid URL.')
-      return
-    }
-
-    if (
-      url.hostname !== 'youtube.com' &&
-      url.hostname !== 'www.youtube.com' &&
-      url.hostname != 'youtu.be' &&
-      url.hostname != 'twitch.tv' &&
-      url.hostname != 'www.twitch.tv'
-    ) {
-      setStatus('Please enter a YouTube or Twitch link.')
-      return
-    }
-    
-    setStatus('Sending link to backend...')
-
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/vod', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url: videoURL.trim(),
-          title: projectTitle.trim()
-        }),
-      })
-
-    const data = await response.json()
-    
-    if (!response.ok) {
-      setStatus(data.detail || data.message || 'The backend returned an error.')
-      return
-    }
-
-    setStatus(`${data.message} Platform: ${data.platform}`)
-    } catch(error) {
-      console.error('Error contacting backend:', error)
-      setStatus('Could not contact the backend. Is it running?')
-    }
-  }
-
-  return (
-    <div>
-      <h2>New Clipping Project</h2>
-      <p>Bring in a gaming VOD and prepare it for automatic highlight detection.</p>
-      <h3>Video Source</h3>
-      <p>Choose a VOD to analyse for highlights.</p>
-
-      <input
-        type="text"
-        placeholder="Enter a project name"
-        value={projectTitle}
-        onChange={(event) => setProjectTitle(event.target.value)}/>
-
-      <input
-        type="url"
-        placeholder="Paste a Twitch or YouTube link"
-        value={videoURL}
-        onChange={(event) => setVideoURL(event.target.value)}/>
-      <button onClick={handleLoadVOD}>Load VOD </button>
-      <p>{status}</p>
-    </div>
-  )
-}
 
 function App() {
   // Remember which navigation item is selected.
@@ -185,102 +100,9 @@ function App() {
           <NewProjectPage/>
         )  
         : activePage === 'Dashboard' ? (
-          <>
-            <section className="welcome-section">
-              <div>
-                <p className="eyebrow">WELCOME TO YOUR WORKSPACE</p>
-                <h3>Turn long streams into great moments.</h3>
-                <p className="welcome-description">
-                  Find highlights, generate captions and create clips
-                  from your gaming VODs, all on your own PC.
-                </p>
-                <button
-                  className="primary-button"
-                  onClick={() => setActivePage('New Project')}
-                >
-                  <span>+</span> Start a new project
-                </button>
-              </div>
-              <div className="welcome-decoration" aria-hidden="true">
-                <div className="decoration-ring ring-one" />
-                <div className="decoration-ring ring-two" />
-                <div className="play-symbol">▶</div>
-              </div>
-            </section>
-
-            <section className="stats-grid">
-              <article className="stat-card">
-                <span className="stat-icon purple">▤</span>
-                <p>Projects</p>
-                <h3>0</h3>
-                <span className="stat-note">Your VOD projects</span>
-              </article>
-
-              <article className="stat-card">
-                <span className="stat-icon pink">▷</span>
-                <p>Clips created</p>
-                <h3>0</h3>
-                <span className="stat-note">Your saved highlights</span>
-              </article>
-
-              <article className="stat-card">
-                <span className="stat-icon blue">✦</span>
-                <p>AI status</p>
-                <h3 className="status-heading">Not configured</h3>
-                <span className="stat-note">Local models come later</span>
-              </article>
-            </section>
-
-            <section className="bottom-grid">
-              <article className="panel">
-                <div className="panel-heading">
-                  <div>
-                    <h3>Recent projects</h3>
-                    <p>Your latest clipping projects will appear here.</p>
-                  </div>
-                  <span className="panel-symbol">▤</span>
-                </div>
-                <div className="empty-state">
-                  <div className="empty-icon">▷</div>
-                  <h4>No projects yet</h4>
-                  <p>
-                    Start with a Twitch VOD or a local video file.
-                  </p>
-                  <button
-                    className="secondary-button"
-                    onClick={() => setActivePage('New Project')}
-                  >
-                    Create your first project
-                  </button>
-                </div>
-              </article>
-
-              <article className="panel system-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h3>System overview</h3>
-                    <p>Your local workspace</p>
-                  </div>
-                  <span className="system-indicator" />
-                </div>
-                <div className="system-row">
-                  <span>Application</span>
-                  <span className="system-value">Running</span>
-                </div>
-                <div className="system-row">
-                  <span>Processing</span>
-                  <span className="system-value muted">Not started</span>
-                </div>
-                <div className="system-row">
-                  <span>AI models</span>
-                  <span className="system-value muted">Not installed</span>
-                </div>
-                <p className="system-footnote">
-                  AI features will be set up in later steps.
-                </p>
-              </article>
-            </section>
-          </>
+          <DashboardPage
+            onNewProject={() => setActivePage('New Project')}
+          /> 
         ) : (
           <section className="placeholder-panel">
             <div className="empty-icon">✦</div>
