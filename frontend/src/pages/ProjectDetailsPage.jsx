@@ -4,6 +4,7 @@ function ProjectDetailsPage ({project, onBack}) {
     const [latestProject, setLatestProject] = useState(project)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [refreshCount, setRefreshCount] = useState(0)
 
     useEffect(() => {
         async function loadProject() {
@@ -29,7 +30,15 @@ function ProjectDetailsPage ({project, onBack}) {
         if (project?.id) {
             loadProject()
         }
-    }, [project?.id])
+    }, [project?.id, refreshCount])
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setRefreshCount((count) => count + 1)
+        }, 3000)
+
+        return () => clearInterval(interval)
+    }, [])
 
     if (loading) {
         return (

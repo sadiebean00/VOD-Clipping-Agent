@@ -100,7 +100,12 @@ function App() {
           </div>
 
         {activePage === 'New Project' ? (
-          <NewProjectPage/>
+          <NewProjectPage
+            onProjectCreated={(projectId) => {
+              setSelectedProject({ id: projectId })
+              setActivePage('Project Details')
+    }}
+/>
         )  
         : activePage === 'Dashboard' ? (
           <DashboardPage

@@ -1,7 +1,7 @@
 
 import { useState } from 'react'
 
-function NewProjectPage() {
+function NewProjectPage({onProjectCreated}) {
   const [videoURL, setVideoURL] = useState('')
   const [projectTitle, setProjectTitle] = useState('')
   const [status, setStatus] = useState('')
@@ -68,7 +68,7 @@ function NewProjectPage() {
         return
       }
 
-      setStatus(`${data.message} Platform: ${data.platform}`)
+      onProjectCreated(data.project_id)
     } catch (error) {
       console.error('Error contacting backend:', error)
       setStatus('Could not contact the backend. Is it running?')

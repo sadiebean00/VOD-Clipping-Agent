@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 DATABASE_PATH = DATA_DIR / "vod_studio.db"
 
+# Gets the connection of the database
 def get_connection():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -19,6 +20,7 @@ def get_connection():
 
     return connection
 
+# Initialises the database
 def initialise_database():
     connection = get_connection()
 
@@ -50,6 +52,7 @@ def initialise_database():
     connection.commit()
     connection.close()
 
+# Creates a project within the database
 def create_project(title, url, platform):
     connection = get_connection()
 
@@ -67,6 +70,7 @@ def create_project(title, url, platform):
 
     return project_id
 
+# Gets all the projects in the database
 def get_projects():
     connection = get_connection()
 
@@ -83,6 +87,7 @@ def get_projects():
 
     return projects
 
+# Gets a singular project in the database
 def get_project(project_id):
     connection = get_connection()
 
@@ -100,6 +105,26 @@ def get_project(project_id):
 
     return project
 
+# Updates the project's status
+def update_project_status(project_id, status, processing_message):
+    connection = get_connection()
+
+    cursor = connection.execute(
+        """
+        UPDATE projects
+        SET status = ?, processing_message = ?
+        WHERE id = ?
+        """,
+        (status, processing_message, project_id),
+    )
+
+    connection.commit()
+    updated = cursor.rowcount > 0
+    connection.close()
+
+    return updated
+
+# Deletes the project
 def delete_project(project_id):
     connection = get_connection()
 

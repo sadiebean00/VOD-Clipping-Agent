@@ -1,7 +1,7 @@
 ### VOD Clipping Agent - Backend
 ### The file starts the web server that will power the dashboard.
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from urllib.parse import urlparse
@@ -11,8 +11,10 @@ from backend.database import (
     create_project,
     get_projects,
     get_project,
+    update_project_status,
     delete_project,
 )
+from video_processing.downloader import download_vod
 
 # Create the application.
 @asynccontextmanager
@@ -66,6 +68,26 @@ def project_details(project_id: int):
 
     return project
 
+@app.patch("/api/projects/{project_id}/status")
+def change_project_status(
+    project_id: int,
+    status: str,
+    processing_message: str,
+):
+    updated = update_project_status(
+        project_id,
+        status,
+        processing_message,
+    )
+
+    if not updated:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found.",
+        )
+
+    return{"message:" "Project status updated successfully."}
+
 @app.delete("/api/projects/{project_id}")
 def remove_project(project_id: int):
     deleted = delete_project(project_id)
@@ -82,8 +104,32 @@ class VODRequest(BaseModel):
     url: str
     title: str
 
+def process_vod_download(project_id, url):
+    update_project_status(
+        project_id,
+        "downloading",
+        "Downloading your VOD...",
+    )
+
+    try:
+        download_vod(url, project_id)
+
+        update_project_status(
+            project_id,
+            "downloaded",
+            "VOD downloaded successfully!",
+        )
+
+    except Exception as error:
+        update_project_status(
+            project_id,
+            "failed",
+            f"Download failed: {error}", 
+        )
+
 @app.post("/api/vod")
-def receive_vod(request: VODRequest):
+def receive_vod(
+    request: VODRequest, background_tasks: BackgroundTasks):
     url = request.url
 
     parsed_url = urlparse(url)
@@ -116,6 +162,12 @@ def receive_vod(request: VODRequest):
         )
 
     project_id = create_project(request.title, url, platform)
+
+    background_tasks.add_task(
+        process_vod_download,
+        project_id,
+        url,
+    )
 
     return {
         "message": "VOD project saved successfully!",
