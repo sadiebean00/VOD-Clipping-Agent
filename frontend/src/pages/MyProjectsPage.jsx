@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-function MyProjectsPage({onNewProject}) {
+function MyProjectsPage({onNewProject, onOpenProject}) {
     const [projects, setProjects] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -103,7 +103,12 @@ function MyProjectsPage({onNewProject}) {
                 <div>
                     {projects.map((project) => (
                         <article className="panel" key={project.id}>
-                            <h4>{project.title}</h4>
+                            <h4
+                                className="clickable-project-title"
+                                onClick={() => onOpenProject(project)}
+                            >
+                                {project.title}
+                            </h4>
                             <p>Platform: {project.platform}</p>
                             <p>Status: {project.status}</p>
                             <p>Created: {project.created_at}</p>

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import NewProjectPage from './pages/NewProjectPage'
 import DashboardPage from './pages/DashboardPage'
 import MyProjectsPage from './pages/MyProjectsPage'
+import ProjectDetailsPage from './pages/ProjectDetailsPage'
 import './App.css'
 
 // Main navigation items for the dashboard.
@@ -17,6 +18,7 @@ const navigationItems = [
 function App() {
   // Remember which navigation item is selected.
   const [activePage, setActivePage] = useState('Dashboard')
+  const [selectedProject, setSelectedProject] = useState(null)
   const [backendStatus, setBackendStatus] = useState('checking')
 
   useEffect(() => {
@@ -107,8 +109,17 @@ function App() {
         ) 
         : activePage === 'My Projects' ? (
             <MyProjectsPage
-             onNewProject={() => setActivePage('New Project')} />
-        ) :     
+             onNewProject={() => setActivePage('New Project')}
+             onOpenProject ={(project) => {
+              setSelectedProject(project)
+              setActivePage('Project Details')
+             }} />
+        ) :  activePage === 'Project Details' ? (
+          <ProjectDetailsPage 
+            project={selectedProject}
+            onBack={() => setActivePage('My Projects')}
+            />
+        ) :   
         (
           <section className="placeholder-panel">
             <div className="empty-icon">✦</div>
