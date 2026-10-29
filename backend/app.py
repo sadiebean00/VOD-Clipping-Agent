@@ -10,6 +10,7 @@ from backend.database import (
     initialise_database,
     create_project,
     get_projects,
+    delete_project,
 )
 
 # Create the application.
@@ -28,9 +29,8 @@ app = FastAPI (
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
-    allow_credentials=False,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"]
+    allow_methods=["*"],
+    allow_headers=["*"]
 )
 
 @app.get("/")
@@ -52,6 +52,18 @@ def health_check():
 @app.get("/api/projects")
 def list_projects():
     return get_projects()
+
+@app.delete("/api/projects/{project_id}")
+def remove_project(project_id: int):
+    deleted = delete_project(project_id)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found."
+        )
+
+    return {"message": "Project deleted successfully."}
 
 class VODRequest(BaseModel):
     url: str

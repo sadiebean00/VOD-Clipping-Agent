@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import NewProjectPage from './pages/NewProjectPage'
 import DashboardPage from './pages/DashboardPage'
+import MyProjectsPage from './pages/MyProjectsPage'
 import './App.css'
 
 // Main navigation items for the dashboard.
@@ -103,7 +104,11 @@ function App() {
           <DashboardPage
             onNewProject={() => setActivePage('New Project')}
           /> 
-        ) : (
+        ) 
+        : activePage === 'My Projects' ? (
+            <MyProjectsPage />
+        ) :     
+        (
           <section className="placeholder-panel">
             <div className="empty-icon">✦</div>
             <h3>{activePage}</h3>
