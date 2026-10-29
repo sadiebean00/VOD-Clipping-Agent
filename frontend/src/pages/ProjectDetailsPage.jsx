@@ -93,6 +93,27 @@ function ProjectDetailsPage ({project, onBack}) {
             </div>
 
             <div className="panel">
+                <h4>Download Progress</h4>
+
+                {latestProject.status === 'downloading' ? (
+                    <piix-progress
+                        pal="penguin"
+                        tone="sky"
+                        label="Downloading your VOD"
+                    />    
+                ) : latestProject. status == 'downloaded' ?(
+                    <piix-progress 
+                        value="100"    
+                        pal="penguin"
+                        tone="sky"
+                        label="Download Complete"
+                    />
+                ) : (
+                    <p>{latestProject.processing_message}</p>
+                )}
+            </div>
+
+            <div className="panel">
                 <h4>Project Information</h4>
                 <p>Platform: {latestProject.platform}</p>
                 <p>Status: {latestProject.status}</p>

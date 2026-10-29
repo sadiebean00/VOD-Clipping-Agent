@@ -8,6 +8,12 @@ import yt_dlp
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOWNLOAD_DIR = PROJECT_ROOT / "data" / "downloads"
 
+# Creates a percentage hook
+def download_progress_hook(data):
+    if data["status"] == "downloading":
+        percentage = data.get("_percent_str", "0%").strip()
+        print(f"Download progress: {percentage}")
+
 # Download the VOD
 def download_vod(url, project_id):
     DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
