@@ -1,4 +1,32 @@
+import { useEffect, useState } from "react"
+
 function DashboardPage({onNewProject}) {
+    const [projects, setProjects] = useState([])
+    const [loadingProjects, setLoadingProjects] = useState(true)
+
+    useEffect(() => {
+        async function loadDashboardProjects() {
+            try {
+                const response = await fetch(
+                    'http://127.0.0.1:8000/api/projects',
+                    { cache: 'no-store'}
+                )
+
+                if (!response.ok) {
+                    throw new Error('Could not load projects.')
+                }
+                const data = await response.json()
+                setProjects(data)
+            } catch (error) {
+                console.error('Dashboard projects failed to load:', error)
+            } finally {
+                setLoadingProjects(false)
+            }
+        }
+
+        loadDashboardProjects()
+    }, [])
+
     return (
         <>
             <section className="welcome-section">
@@ -57,17 +85,36 @@ function DashboardPage({onNewProject}) {
                         <span className="panel-symbol">▤</span>
                     </div>
 
-                    <div className="empty-state">
-                        <div className="empty-icon">▷</div>
-                        <h4>No projects yet</h4>
-                        <p>Start with a Twitch VOD or YouTube video.</p>
-                        <button
-                            className="secondary-button"
-                            onClick={onNewProject}
-                        >
-                            Create your first project
+                    {loadingProjects && (
+                        <p>Loading projects...</p>
+                    )}
+
+                    {!loadingProjects && projects.length === 0 && (
+                        <div className="empty-state">
+                            <div className="empty-icon">▷</div>
+                            <h4>No Projects Yet</h4>
+                            <p>Start a new project to see it here.</p>
+                            <button 
+                                className="secondary-button"
+                                onClick={onNewProject}
+                            >
+                              Create your first project  
                             </button>
-                    </div>
+                        </div>
+                    )}
+
+                    {!loadingProjects && projects.length > 0 && (
+                        <div>
+                            {projects.slice(0,3).map((project) => (
+                                <div className="system-row" key={project.id}>
+                                    <div>
+                                        <strong>{project.title}</strong>
+                                        <p>{project.platform} . {project.status}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </article>
 
                 <article className="panel system-panel">

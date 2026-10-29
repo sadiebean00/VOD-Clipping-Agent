@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-function MyProjectsPage() {
+function MyProjectsPage({onNewProject}) {
     const [projects, setProjects] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -75,6 +75,12 @@ function MyProjectsPage() {
                 <div>
                     <h3>MyProjects</h3>
                     <p>Your saved VOD clipping projects.</p>
+                    <button
+                        className="primary-button"
+                        onClick={onNewProject}
+                    >
+                        + Create a New Project
+                        </button>
                 </div>
 
                 <button

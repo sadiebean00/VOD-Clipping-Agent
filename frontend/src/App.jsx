@@ -106,7 +106,8 @@ function App() {
           /> 
         ) 
         : activePage === 'My Projects' ? (
-            <MyProjectsPage />
+            <MyProjectsPage
+             onNewProject={() => setActivePage('New Project')} />
         ) :     
         (
           <section className="placeholder-panel">
