@@ -5,12 +5,24 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from urllib.parse import urlparse
+from contextlib import asynccontextmanager
+from backend.database import (
+    initialise_database,
+    create_project,
+    get_projects,
+)
 
 # Create the application.
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    initialise_database()
+    yield
+
 app = FastAPI (
     title="VOD Clipping Agent",
     description="A local tool for finding and creating gaming VOD highlights.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -37,8 +49,13 @@ def health_check():
         "message": "Backend is working correctly."
     }
 
+@app.get("/api/projects")
+def list_projects():
+    return get_projects()
+
 class VODRequest(BaseModel):
     url: str
+    title: str
 
 @app.post("/api/vod")
 def receive_vod(request: VODRequest):
@@ -73,8 +90,12 @@ def receive_vod(request: VODRequest):
             detail="Please enter a valid YouTube or Twitch link.",
         )
 
+    project_id = create_project(request.title, url, platform)
+
     return {
-        "message": "VOD link received by the backend!",
+        "message": "VOD project saved successfully!",
+        "project_id": project_id,
+        "title": request.title,
         "url": url,
         "platform": platform,
     }

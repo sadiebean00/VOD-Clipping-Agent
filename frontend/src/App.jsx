@@ -13,8 +13,14 @@ const navigationItems = [
 
 function NewProjectPage() {
   const [videoURL, setVideoURL] = useState('')
+  const [projectTitle, setProjectTitle] = useState('')
   const [status, setStatus] = useState('')
   async function handleLoadVOD() {
+    if (projectTitle.trim() === '') {
+      setStatus('Please enter a project name.')
+      return
+    }
+    
     if (videoURL.trim() === '') {
       setStatus('Please enter a video link first.')
       return
@@ -48,7 +54,10 @@ function NewProjectPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({url: videoURL.trim()}),
+        body: JSON.stringify({
+          url: videoURL.trim(),
+          title: projectTitle.trim()
+        }),
       })
 
     const data = await response.json()
@@ -71,6 +80,13 @@ function NewProjectPage() {
       <p>Bring in a gaming VOD and prepare it for automatic highlight detection.</p>
       <h3>Video Source</h3>
       <p>Choose a VOD to analyse for highlights.</p>
+
+      <input
+        type="text"
+        placeholder="Enter a project name"
+        value={projectTitle}
+        onChange={(event) => setProjectTitle(event.target.value)}/>
+
       <input
         type="url"
         placeholder="Paste a Twitch or YouTube link"
