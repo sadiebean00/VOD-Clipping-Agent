@@ -23,7 +23,13 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
             }
 
             const data = await response.json()
-            setProjects(data)
+            setProjects(currentProjects => {
+                if (JSON.stringify(currentProjects) === JSON.stringify(data)) {
+                    return currentProjects
+                }
+
+                return data
+            })
             } catch {
                 setError('Could not load projects. Is the backend running?')
             } finally {
@@ -61,12 +67,18 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
                     }
 
                     await loadProjects()
-                } catch(error) {
-                    setError.Error(error.message)
+                } catch (error) {
+                    setError(error.message)
                 }
             }
         useEffect(() => {
             loadProjects()
+
+            const interval = setInterval(() => {
+                loadProjects()
+            }, 3000)
+
+            return () => clearInterval(interval)
     }, [])
 
     return (
@@ -109,10 +121,48 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
                             >
                                 {project.title}
                             </h4>
+                            
                             <p>Platform: {project.platform}</p>
-                            <p>Status: {project.status}</p>
-                            <p>Created: {project.created_at}</p>
+                            {(project.status === 'downloading' || project.status === 'downloaded') && (
+                                <p>
+                                    Download Progress: {
+                                        project.status === 'downloaded'
+                                            ? 100
+                                            : Math.round(project.download_progress || 0)
+                                    }%
+                                </p>
+)}
 
+                            <p>
+                                Status: {
+                                    project.status === 'downloaded'
+                                        ? 'Download Complete'
+                                        : project.status === 'downloading'
+                                        ? 'Downloading...'
+                                        : project.status === 'failed'
+                                        ? 'Download Failed'
+                                        : project.status === 'pending'
+                                        ? 'Waiting to Download'
+                                        : project.status
+                                }
+                            </p>
+                            <p>
+                                Created: {new Date(project.created_at).toLocaleString('en-GB', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </p>
+                            
+                            <button
+                                className="primary-button"
+                                onClick={() => onOpenProject(project)}
+                            >
+                                Open Project
+                            </button>
+                            
                             <button
                                 className="secondary-button"
                                 onClick={() => handleRemove(project.id)}

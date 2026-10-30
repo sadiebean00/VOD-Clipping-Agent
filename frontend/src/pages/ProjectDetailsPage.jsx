@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import DownloadProgress from "../components/DowloadProgress"
+import DownloadProgress from "../components/DownloadProgress"
 
 function ProjectDetailsPage ({project, onBack}) {
     const [latestProject, setLatestProject] = useState(project)
@@ -110,7 +110,15 @@ function ProjectDetailsPage ({project, onBack}) {
                 <p>Platform: {latestProject.platform}</p>
                 <p>Status: {latestProject.status}</p>
                 <p>Processing: {latestProject.processing_message}</p>
-                <p>Created: {latestProject.created}</p>
+                <p>
+                    Created: {new Date(latestProject.created_at).toLocaleString('en-GB', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                    minute: '2-digit'
+    })}
+</p>
                 <p>VOD URL: {latestProject.url}</p>
             </div>
 
