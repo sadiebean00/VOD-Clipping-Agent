@@ -14,6 +14,7 @@ from backend.database import (
     update_project_status,
     update_download_progress,
     delete_project,
+    clean_all_projects
 )
 from video_processing.downloader import download_vod
 
@@ -100,6 +101,12 @@ def remove_project(project_id: int):
         )
 
     return {"message": "Project deleted successfully."}
+
+@app.delete("/api/projects")
+def clean_projects():
+    clean_all_projects()
+    return {"message:" "All projects and downloaded files have been deleted."}
+
 
 class VODRequest(BaseModel):
     url: str

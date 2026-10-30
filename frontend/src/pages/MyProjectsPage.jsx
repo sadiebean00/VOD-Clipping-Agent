@@ -5,6 +5,7 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [refreshing, setRefreshing] = useState(false)
+    const [cleaning, setCleaning] = useState(false)
 
      async function loadProjects() {
         if (projects.length === 0) {
@@ -71,6 +72,36 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
                     setError(error.message)
                 }
             }
+
+            async function handleCleanUp() {
+                const confirmed = window.confirm(
+                    "Are you sure you want to permanently delete ALL projects, downloaded VODs and generated clips? This cannot be undone."
+                )
+
+                if (!confirmed) {
+                    return
+                }
+
+                setCleaning(true)
+
+                try {
+                    const response = await fetch(
+                        'http://127.0.0.1:8000/api/projects',
+                        { method: 'DELETE'}
+                    )
+
+                    if (!response.ok) {
+                        throw new Error('Could not clean up project data.')
+                    }
+
+                    await loadProjects()
+                } catch (error) {
+                    setError(error.message)
+                } finally {
+                    setCleaning(false)
+                }
+            }
+
         useEffect(() => {
             loadProjects()
 
@@ -101,6 +132,14 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
                     disabled={refreshing || loading}
                 >
                     {refreshing ? 'Refreshing...' : 'Refresh Projects'}
+                </button>
+
+                <button
+                    className="secondary-button"
+                    onClick={handleCleanUp}
+                    disabled={cleaning || loading}
+                >
+                    {cleaning ? 'Cleaning Up...' : 'Clean Up Data'}
                 </button>
             </div>
             {loading && <p>Loading projects...</p>}

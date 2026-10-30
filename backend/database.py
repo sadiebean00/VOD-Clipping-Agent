@@ -162,4 +162,36 @@ def delete_project(project_id):
     deleted = cursor.rowcount > 0
     connection.close()
 
+    if deleted:
+        project_root = Path(__file__).resolve().parent.parent
+        downloads_dir = project_root / "data" / "downloads"
+
+        for file_path in downloads_dir.glob(f"project_{project_id}.*"):
+            file_path.unlink()
+
     return deleted
+
+# Cleans up all the projects
+def clean_all_projects():
+    connection = get_connection()
+
+    connection.execute("DELETE FROM sqlite_sequence WHERE name = 'projects'")
+    connection.execute("DELETE FROM projects")
+    connection.commit()
+    connection.close()
+
+    project_root = Path(__file__).resolve().parent.parent
+
+    folders = [
+        project_root / "data" / "downloads",
+        project_root / "data" / "clips",
+    ]
+
+    for folder in folders:
+        if folder.exists():
+            for file_path in folder.iterdir():
+                if file_path.is_file():
+                    file_path.unlink()
+
+
+    return True
