@@ -616,3 +616,33 @@ button:focus-visible {
 .backend-status.offline .status-dot {
   background: #ef4444;
 }
+
+.download-progress {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.download-progress-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 10px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.download-progress-track {
+    width: 100%;
+    height: 18px;
+    background: #252a3a;
+    border: 2px solid #424b65;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.download-progress-fill {
+    height: 100%;
+    background: #65b9ff;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}

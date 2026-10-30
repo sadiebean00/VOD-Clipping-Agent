@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import DownloadProgress from "../components/DowloadProgress"
 
 function ProjectDetailsPage ({project, onBack}) {
     const [latestProject, setLatestProject] = useState(project)
@@ -96,18 +97,9 @@ function ProjectDetailsPage ({project, onBack}) {
                 <h4>Download Progress</h4>
 
                 {latestProject.status === 'downloading' ? (
-                    <piix-progress
-                        pal="penguin"
-                        tone="sky"
-                        label="Downloading your VOD"
-                    />    
-                ) : latestProject. status == 'downloaded' ?(
-                    <piix-progress 
-                        value="100"    
-                        pal="penguin"
-                        tone="sky"
-                        label="Download Complete"
-                    />
+                    <DownloadProgress progress={latestProject.download_progress} />
+                ) : latestProject.status === 'downloaded' ? (
+                    <DownloadProgress progress={100} />
                 ) : (
                     <p>{latestProject.processing_message}</p>
                 )}

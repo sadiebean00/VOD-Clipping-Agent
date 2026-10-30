@@ -32,6 +32,7 @@ def initialise_database():
             platform TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'Pending',
             processing_message TEXT DEFAULT 'Waiting to be processed',
+            download_progress REAL DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -47,7 +48,13 @@ def initialise_database():
         ALTER TABLE projects
         ADD COLUMN processing_message TEXT
         DEFAULT 'Waiting to be processed'
-    """)
+        """)
+
+    if "download_progress" not in column_names:
+        connection.execute("""
+        ALTER TABLE projects
+        ADD COLUMN download_progress REAL DEFAULT 0
+        """)
 
     connection.commit()
     connection.close()
@@ -76,7 +83,7 @@ def get_projects():
 
     rows = connection.execute(
         """
-        SELECT id, title, url, platform, status, processing_message, created_at
+        SELECT id, title, url, platform, status, processing_message, download_progress, created_at
         FROM projects   
         ORDER BY created_at DESC, id DESC
         """
@@ -93,7 +100,7 @@ def get_project(project_id):
 
     row = connection.execute(
         """
-        SELECT id, title, url, platform, status, processing_message, created_at
+        SELECT id, title, url, platform, status, processing_message, download_progress, created_at
         FROM projects
         WHERE id = ?
         """,
@@ -116,6 +123,24 @@ def update_project_status(project_id, status, processing_message):
         WHERE id = ?
         """,
         (status, processing_message, project_id),
+    )
+
+    connection.commit()
+    updated = cursor.rowcount > 0
+    connection.close()
+
+    return updated
+
+def update_download_progress(project_id, percentage):
+    connection = get_connection()
+
+    cursor = connection.execute(
+        """
+        UPDATE projects
+        SET download_progress = ?
+        WHERE id = ?
+        """,
+        (percentage, project_id)
     )
 
     connection.commit()

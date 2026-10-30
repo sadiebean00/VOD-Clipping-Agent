@@ -12,6 +12,7 @@ from backend.database import (
     get_projects,
     get_project,
     update_project_status,
+    update_download_progress,
     delete_project,
 )
 from video_processing.downloader import download_vod
@@ -105,6 +106,9 @@ class VODRequest(BaseModel):
     title: str
 
 def process_vod_download(project_id, url):
+    def progress_callback(percentage):
+        update_download_progress(project_id, percentage)
+
     update_project_status(
         project_id,
         "downloading",
@@ -112,7 +116,7 @@ def process_vod_download(project_id, url):
     )
 
     try:
-        download_vod(url, project_id)
+        download_vod(url, project_id, progress_callback)
 
         update_project_status(
             project_id,
