@@ -21,30 +21,34 @@ function App() {
   const [selectedProject, setSelectedProject] = useState(null)
   const [backendStatus, setBackendStatus] = useState('checking')
 
-  useEffect(() => {
-    async function checkBackend() {
-      try {
-        const response = await fetch(
-          'http://192.168.0.31:8000/api/health',
-          {cache: 'no-store'}
-        )
 
-        if (!response.ok) {
-          throw new Error('Backend unavailable')
-        }
-        
-        setBackendStatus('online')
-      } catch {
-        setBackendStatus('offline')
+  async function checkBackend() {
+    setBackendStatus('checking')
+
+    try {
+      const response = await fetch(
+        'http://192.168.0.31:8000/api/health',
+        { cache: 'no-store' }
+      )
+
+      if (!response.ok) {
+        throw new Error('Backend unavailable')
       }
-    }
 
+      setBackendStatus('online')
+    } catch {
+      setBackendStatus('offline')
+    }
+  }
+
+  useEffect(() => {
     checkBackend()
 
     const intervalID = setInterval(checkBackend, 5000)
 
     return () => clearInterval(intervalID)
   }, [])
+
 
   return (
     <div className="app-shell">
@@ -94,10 +98,22 @@ function App() {
           <div className="profile-badge">VC</div>
         </header>
 
-        <div className={`backend-status ${backendStatus}`}>
-          <span className="status-dot" />
-          Backend: {backendStatus}
+        
+        <div className="backend-status-container">
+          <div className={`backend-status ${backendStatus}`}>
+            <span className="status-dot" />
+            Backend: {backendStatus}
           </div>
+
+          <button
+            className="secondary-button"
+            onClick={checkBackend}
+            disabled={backendStatus === 'checking'}
+          >
+            {backendStatus === 'checking' ? 'Checking...' : 'Refresh Backend'}
+          </button>
+        </div>
+
 
         {activePage === 'New Project' ? (
           <NewProjectPage
