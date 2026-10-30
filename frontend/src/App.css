@@ -619,25 +619,26 @@ button:focus-visible {
 
 .download-progress {
     width: 100%;
-    margin: 20px 0;
+    margin: 45px 0 20px;
 }
 
 .download-progress-heading {
     display: flex;
     justify-content: space-between;
     gap: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 40px;
     color: #ffffff;
     font-size: 14px;
 }
 
 .download-progress-track {
+    position: relative;
     width: 100%;
     height: 18px;
     background: #252a3a;
     border: 2px solid #424b65;
     border-radius: 6px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .download-progress-fill {
@@ -645,4 +646,14 @@ button:focus-visible {
     background: #65b9ff;
     border-radius: 3px;
     transition: width 0.3s ease;
+}
+
+.download-penguin {
+    position: absolute;
+    top: -27px;
+    transform: translateX(-50%);
+    font-size: 22px;
+    line-height: 1;
+    transition: left 0.3s ease;
+    z-index: 2;
 }

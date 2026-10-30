@@ -1,3 +1,5 @@
+import { PiixPal} from 'piixpal/react'
+
 function DownloadProgress({ progress = 0}) {
     const percentage = Math.min(100, Math.max(0, progress))
 
@@ -9,12 +11,16 @@ function DownloadProgress({ progress = 0}) {
             </div>
 
             <div className="download-progress-track">
-                <div
-                    className="download-progress-fill"
-                    style={{ width: `${percentage}%`}}
-                />    
-            </div>
+            <div
+                className="download-progress-fill"
+                style={{ width: `${percentage}%` }}
+            />
+            <PiixPal
+                pal="pinch"
+                side="top"
+            />
         </div>
+    </div>
     )
 }
 
