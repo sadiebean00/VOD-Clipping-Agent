@@ -15,6 +15,8 @@ from backend.database import (
     update_project_status,
     update_download_progress,
     delete_project,
+    save_clip,
+    get_clips,
     clean_all_projects
 )
 from video_processing.downloader import download_vod
@@ -217,6 +219,30 @@ def process_vod_clipping(project_id, video_path, clips):
         project_id=project_id
     )
 
+    failed_clips = {
+        (clip["start_time"], clip["end_time"])
+        for clip in results["failed"]
+    }
+
+    successful_clips = [
+        clip for clip in clips
+        if clip not in failed_clips
+    ]
+
+    for clip_path, (start_time, end_time) in zip(
+        results["created"],
+        successful_clips
+    ):
+        clip_path = Path(clip_path)
+
+        save_clip(
+            project_id=project_id,
+            filename=clip_path.name,
+            start_time=start_time,
+            end_time=end_time,
+            size_bytes=clip_path.stat().st_size
+        )
+
     return results
 
 # Creates the project clips in the app
@@ -259,7 +285,7 @@ def create_project_clips(
 
     return results
 
-# Lists the project clips
+# Lists the project clips from the database
 @app.get("/api/projects/{project_id}/clips")
 def list_project_clips(project_id: int):
     project = get_project(project_id)
@@ -270,23 +296,7 @@ def list_project_clips(project_id: int):
             detail="Project not found."
         )
 
-    project_root = Path(__file__).resolve().parent.parent
-    clips_dir = project_root / "data" / "clips"
-
-    if not clips_dir.exists():
-        return {"clips": []}
-
-    clip_files = sorted(
-        clips_dir.glob(f"project{project_id}_clip_*.mp4")
-    )
-
-    clips = [
-        {
-            "filename": clip_file.name,
-            "size_bytes": clip_file.stat().st_size
-        }
-        for clip_file in clip_files
-    ]
+    clips = get_clips(project_id)
 
     return {"clips": clips}
 

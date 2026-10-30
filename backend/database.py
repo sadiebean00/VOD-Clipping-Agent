@@ -56,6 +56,19 @@ def initialise_database():
         ADD COLUMN download_progress REAL DEFAULT 0
         """)
 
+    connection.execute("""
+    CREATE TABLE IF NOT EXISTS clips (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_id INTEGER NOT NULL,
+        filename TEXT NOT NULL,
+        start_time REAL NOT NULL,
+        end_time REAL NOT NULL,
+        size_bytes INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (project_id) REFERENCES projects(id)
+        )
+    """)
+
     connection.commit()
     connection.close()
 
@@ -153,9 +166,22 @@ def update_download_progress(project_id, percentage):
 def delete_project(project_id):
     connection = get_connection()
 
+    # Find all clips belonging to this project
+    clips = connection.execute(
+        "SELECT filename FROM clips WHERE project_id = ?",
+        (project_id,)
+    ).fetchall()
+
+    # Delete the clip records
+    connection.execute(
+        "DELETE FROM clips WHERE project_id = ?",
+        (project_id,)
+    )
+
+    # Delete the project record
     cursor = connection.execute(
         "DELETE FROM projects WHERE id = ?",
-        (project_id,),
+        (project_id,)
     )
 
     connection.commit()
@@ -164,10 +190,20 @@ def delete_project(project_id):
 
     if deleted:
         project_root = Path(__file__).resolve().parent.parent
-        downloads_dir = project_root / "data" / "downloads"
 
+        downloads_dir = project_root / "data" / "downloads"
+        clips_dir = project_root / "data" / "clips"
+
+        # Delete the downloaded VOD
         for file_path in downloads_dir.glob(f"project_{project_id}.*"):
             file_path.unlink()
+
+        # Delete generated clips
+        for clip in clips:
+            clip_path = clips_dir / clip["filename"]
+
+            if clip_path.is_file() and clip_path.parent == clips_dir:
+                clip_path.unlink()
 
     return deleted
 
@@ -195,3 +231,49 @@ def clean_all_projects():
 
 
     return True
+
+# Saves a generated clip to the database
+def save_clip(project_id, filename, start_time, end_time, size_bytes):
+    connection = get_connection()
+
+    connection.execute("""
+        INSERT INTO CLIPS (
+            project_id,
+            filename,
+            start_time,
+            end_time,
+            size_bytes
+        )
+        VALUES (?, ?, ?, ?, ?)
+        """, (
+            project_id,
+            filename,
+            start_time,
+            end_time,
+            size_bytes
+        ))
+
+    connection.commit()
+    connection.close()
+
+# Retrieves all saved clips belonging to a project
+def get_clips(project_id):
+    connection = get_connection()
+
+    rows = connection.execute("""
+        SELECT
+            id,
+            project_id,
+            filename,
+            start_time,
+            end_time,
+            size_bytes,
+            created_at
+        FROM clips
+        WHERE project_id = ?
+        ORDER BY created_at ASC, id ASC
+    """, (project_id,)).fetchall()
+
+    connection.close()
+
+    return [dict(row) for row in rows]
