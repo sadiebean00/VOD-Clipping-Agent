@@ -6,6 +6,8 @@ function ProjectDetailsPage ({project, onBack}) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [refreshCount, setRefreshCount] = useState(0)
+    const [clips, setClips]= useState([])
+    const [clipsError, setClipsError] = useState('')
 
     useEffect(() => {
         async function loadProject() {
@@ -30,6 +32,31 @@ function ProjectDetailsPage ({project, onBack}) {
 
         if (project?.id) {
             loadProject()
+        }
+    }, [project?.id, refreshCount])
+
+    useEffect(() => {
+        async function loadClips() {
+            try{
+                const response = await fetch(
+                    `http://127.0.0.1:8000/api/projects/${project.id}/clips`,
+                    { cache: 'no-store' }
+                )
+
+                if (!response.ok) {
+                    throw new Error('Could not load generated clips.')
+                }
+
+                const data = await response.json()
+                setClips(data.clips)
+                setClipsError('')
+            } catch (error) {
+                setClipsError(error.message)
+            }
+        }
+        
+        if (project?.id) {
+            loadClips()
         }
     }, [project?.id, refreshCount])
 
@@ -117,14 +144,41 @@ function ProjectDetailsPage ({project, onBack}) {
                         year: 'numeric',
                         hour: '2-digit',
                     minute: '2-digit'
-    })}
-</p>
+                    })}
+                </p>
                 <p>VOD URL: {latestProject.url}</p>
             </div>
 
             <div className="panel">
                 <h4>Generated Clips</h4>
-                <p>No clips yet. Your clips will appear here once processing is built.</p>
+
+                {clipsError && <p role="alert">{clipsError}</p>}
+
+                {!clipsError && clips.length == 0 && (
+                    <p>No clips generated yet. Create a project to get started.</p>
+                )}
+
+                {clips.map((clip, index) => (
+                    <article className="panel" key={clip.filename}>
+                        <h4>Clip {index + 1}</h4>
+
+                        <video
+                            controls
+                            width="100%"
+                            src={`http://127.0.0.1:8000/api/projects/${project.id}/clips/${encodeURIComponent(clip.filename)}`}
+                        />
+
+                        <a
+                            href={`http://127.0.0.1:8000/api/projects/${project.id}/clips/${encodeURIComponent(clip.filename)}`}
+                            download={clip.filename}
+                        >
+                            Download MP4
+                        </a>
+
+                        <p>Filename: {clip.filename}</p>
+                        <p>File size: {(clip.size_bytes / (1024 * 1024)).toFixed(2)} MB</p>
+                    </article>
+                ))}
             </div>
         </section>
     )
