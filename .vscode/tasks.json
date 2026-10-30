@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start VOD Studio Backend",
+            "type": "shell",
+            "command": ".\\.venv\\Scripts\\python.exe -m uvicorn backend.app:app --reload",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Start VOD Studio Frontend",
+            "type": "shell",
+            "command": "npm run dev",
+            "options":{
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Start VOD Studio",
+            "dependsOn":[
+                "Start VOD Studio Backend",
+                "Start VOD Studio Frontend"
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": []
+        }
+    ]
+}
