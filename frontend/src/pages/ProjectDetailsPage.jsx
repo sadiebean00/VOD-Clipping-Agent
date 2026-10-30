@@ -13,7 +13,7 @@ function ProjectDetailsPage ({project, onBack}) {
         async function loadProject() {
             try {
                 const response = await fetch(
-                    `http://127.0.0.1:8000/api/projects/${project.id}`,
+                    `http://192.168.0.31:8000/api/projects/${project.id}`,
                     { cache: 'no-store'}
                 )
 
@@ -39,7 +39,7 @@ function ProjectDetailsPage ({project, onBack}) {
         async function loadClips() {
             try{
                 const response = await fetch(
-                    `http://127.0.0.1:8000/api/projects/${project.id}/clips`,
+                    `http://192.168.0.31:8000/api/projects/${project.id}/clips`,
                     { cache: 'no-store' }
                 )
 
@@ -165,11 +165,11 @@ function ProjectDetailsPage ({project, onBack}) {
                         <video
                             controls
                             width="100%"
-                            src={`http://127.0.0.1:8000/api/projects/${project.id}/clips/${encodeURIComponent(clip.filename)}`}
+                            src={`http://192.168.0.31:8000/api/projects/${project.id}/clips/${encodeURIComponent(clip.filename)}`}
                         />
 
                         <a
-                            href={`http://127.0.0.1:8000/api/projects/${project.id}/clips/${encodeURIComponent(clip.filename)}`}
+                            href={`http://192.168.0.31:8000/api/projects/${project.id}/clips/${encodeURIComponent(clip.filename)}`}
                             download={clip.filename}
                         >
                             Download MP4

@@ -15,7 +15,7 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
 
         try {
             const response = await fetch(
-                'http://127.0.0.1:8000/api/projects',
+                'http://192.168.0.31:8000/api/projects',
                 { cache: 'no-store'}
             )
 
@@ -59,7 +59,7 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
 
                 try {
                     const response = await fetch(
-                        `http://127.0.0.1:8000/api/projects/${projectID}`,
+                        `http://192.168.0.31:8000/api/projects/${projectID}`,
                         {method: 'DELETE'}
                     )
 
@@ -86,7 +86,7 @@ function MyProjectsPage({onNewProject, onOpenProject}) {
 
                 try {
                     const response = await fetch(
-                        'http://127.0.0.1:8000/api/projects',
+                        'http://192.168.0.31:8000/api/projects',
                         { method: 'DELETE'}
                     )
 

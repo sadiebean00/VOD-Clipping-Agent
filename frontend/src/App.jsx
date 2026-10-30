@@ -25,7 +25,7 @@ function App() {
     async function checkBackend() {
       try {
         const response = await fetch(
-          'http://127.0.0.1:8000/api/health',
+          'http://192.168.0.31:8000/api/health',
           {cache: 'no-store'}
         )
 
