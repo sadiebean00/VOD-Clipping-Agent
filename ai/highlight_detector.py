@@ -3,12 +3,22 @@
 
 import numpy as np
 
+def format_timestamp(seconds):
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    remaining_seconds = int(seconds % 60)
+
+    return f"{hours:02d}:{minutes:02d}:{remaining_seconds:02d}"
+
 
 def detect_highlights(
     audio_results,
     sensitivity=2.0,
     minimum_gap=1.0,
-    minimum_duration=0.1
+    minimum_duration=0.1,
+    gameplay_start=0.0,
+    padding_before=5.0,
+    padding_after=5.0
 ):
     energy = audio_results["energy"]
     timestamps = audio_results["timestamps"]
@@ -18,7 +28,9 @@ def detect_highlights(
 
     threshold = average_energy + (sensitivity * energy_deviation)
 
-    highlight_indices = np.where(energy > threshold)[0]
+    highlight_indices = np.where(
+        (energy > threshold) & (timestamps >= gameplay_start)
+    )[0]
 
     if len(highlight_indices) == 0:
         return []
@@ -39,8 +51,8 @@ def detect_highlights(
 
             if duration >= minimum_duration:
                 highlights.append({
-                    "start_time": float(start_time),
-                    "end_time": float(last_time),
+                    "start_time": max(gameplay_start, float(start_time) - padding_before),
+                    "end_time": float(last_time) + padding_after,
                     "peak_energy": float(peak_energy)
                 })
 
@@ -53,9 +65,15 @@ def detect_highlights(
 
     if duration >= minimum_duration:
         highlights.append({
-            "start_time": float(start_time),
-            "end_time": float(last_time),
+            "start_time": max(gameplay_start, float(start_time) - padding_before),
+            "end_time": float(last_time) + padding_after,
             "peak_energy": float(peak_energy)
         })
+
+
+    highlights.sort(
+        key=lambda highlight: highlight["peak_energy"],
+        reverse=True
+    )
 
     return highlights

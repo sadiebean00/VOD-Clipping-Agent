@@ -1,7 +1,7 @@
 from ai.intro_detector import analyse_visual_activity
 from ai.gameplay_detector import detect_gameplay_start
 
-video_path = "data/downloads/project_1.mkv"
+video_path = "data/downloads/project_3.mp4"
 
 print("Testing intro detection...")
 
